@@ -4,18 +4,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.androidmapsextensions.ClusteringSettings;
+import com.androidmapsextensions.GoogleMap;
+import com.androidmapsextensions.MarkerOptions;
+import com.androidmapsextensions.SupportMapFragment;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.support.v7.app.ActionBarActivity;
 import android.app.Dialog;
@@ -32,10 +32,11 @@ import android.widget.Toast;
 public class MainActivity extends ActionBarActivity implements  LocationListener {
 
 	private static final String LOG_TAG = "WCKiev";	 
-    private static final String SERVICE_URL = "https://api.myjson.com/bins/21vps";
+    private static final String SERVICE_URL = "http://zloysalat.github.io/test.json";
 	
 	// Google Map
     private GoogleMap googleMap;
+    //private ClusterManager<Point> mClusterManager;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,17 +45,20 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 		
 		// Getting Google Play availability status
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getBaseContext());
- 
+        
         // Showing status
-        if(status!=ConnectionResult.SUCCESS){ // Google Play Services are not available
- 
+        if(status!=ConnectionResult.SUCCESS){ // Google Play Services are not available        	
             int requestCode = 10;
             Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this, requestCode);
             dialog.show();
+            Log.e(LOG_TAG, "Google Play Services are not available");
         } else {  // Google Play Services are available
         	try {
                 // Loading map
-                initilizeMap();
+        		
+        		Log.e(LOG_TAG, "Google Play Services are available");
+        		initilizeMap();
+                
      
             } catch (Exception e) {
                 e.printStackTrace();
@@ -70,8 +74,10 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
     
 	private void initilizeMap() {
         if (googleMap == null) {
-        	SupportMapFragment mapFragment = (SupportMapFragment)  getSupportFragmentManager().findFragmentById(R.id.map);
-        	googleMap = mapFragment.getMap(); 
+        	
+        	SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        	Log.e(LOG_TAG, "START");
+        	googleMap = mapFragment.getExtendedMap();
         	
         	// Enabling MyLocation Layer of Google Map
             googleMap.setMyLocationEnabled(true);
@@ -93,6 +99,9 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
             }
             locationManager.requestLocationUpdates(provider, 20000, 0, this);
         	
+            //clustering
+            googleMap.setClustering(new ClusteringSettings().addMarkersDynamically(true));
+            
             if (googleMap != null) {
                 setUpMap();
             }
@@ -151,12 +160,28 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
             public void run() {
                 try {
                     createMarkersFromJson(json.toString());
+                	//readItems(json.toString());
                 } catch (JSONException e) {
                     Log.e(LOG_TAG, "Error processing JSON", e);
                 }
             }
         });
     }
+	
+//	private void readItems(String json) throws JSONException {
+//        
+//        List<Point> items = new PointReader().read(json);
+//        for (int i = 0; i < items.size(); i++) {
+//            //double offset = i / 60d;
+//            for (Point item : items) {
+//                //LatLng position = item.getPosition();
+//                //double lat = position.latitude + offset;
+//                //double lng = position.longitude + offset;
+//                //Point offsetItem = new Point(lat, lng);
+//                mClusterManager.addItem(item);
+//            }
+//        }
+//    }
 	
 	void createMarkersFromJson(String json) throws JSONException {
         // De-serialize the JSON string into an array of city objects
@@ -166,13 +191,13 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
             JSONObject jsonObj = jsonArray.getJSONObject(i);
             googleMap.addMarker(new MarkerOptions()
                 .title(jsonObj.getString("name"))
-                .snippet(Integer.toString(jsonObj.getInt("population")))
+                .snippet(Integer.toString(jsonObj.getInt("comfort")))
                 .position(new LatLng(
-                        jsonObj.getJSONArray("latlng").getDouble(0),
-                        jsonObj.getJSONArray("latlng").getDouble(1)
+                        jsonObj.getDouble("lat"),
+                        jsonObj.getDouble("lng")
                  ))
             );
-        }
+        }        
     }
 	
     @Override
@@ -235,7 +260,7 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 		// TODO Auto-generated method stub
 		
 	}
-
-
+	
+	
 
 }
