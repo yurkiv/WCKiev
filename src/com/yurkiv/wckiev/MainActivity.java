@@ -11,31 +11,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.androidmapsextensions.ClusteringSettings;
-import com.androidmapsextensions.GoogleMap;
-import com.androidmapsextensions.GoogleMap.InfoWindowAdapter;
-import com.androidmapsextensions.GoogleMap.OnInfoWindowClickListener;
-import com.androidmapsextensions.GoogleMap.OnMapClickListener;
-import com.androidmapsextensions.Marker;
-import com.androidmapsextensions.GoogleMap.OnMarkerClickListener;
-import com.androidmapsextensions.MarkerOptions;
-import com.androidmapsextensions.SupportMapFragment;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBar.OnNavigationListener;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.PopupMenu;
-import android.support.v7.widget.ShareActionProvider;
-import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.location.Address;
@@ -46,19 +21,34 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.animation.TranslateAnimation;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.androidmapsextensions.ClusteringSettings;
+import com.androidmapsextensions.GoogleMap;
+import com.androidmapsextensions.GoogleMap.OnMapClickListener;
+import com.androidmapsextensions.GoogleMap.OnMarkerClickListener;
+import com.androidmapsextensions.Marker;
+import com.androidmapsextensions.MarkerOptions;
+import com.androidmapsextensions.SupportMapFragment;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 
 public class MainActivity extends ActionBarActivity implements  LocationListener {
 
@@ -66,17 +56,17 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
     private static final String SERVICE_URL = "http://zloysalat.github.io/test.json";
     
     private GoogleMap googleMap;    
-    Location location;
+    private Location location;
     
-    LinearLayout layout;    
-    TextView nameTextView;
-    TextView descTextView;
-    TextView addressTextView;    
-    RatingBar ratingBar;    
-    TextView distTextView;  
-    Button streetViewButton;
-    Button navigateButton;
-    Button reportButton;	
+    private LinearLayout layout;    
+    private TextView nameTextView;
+    private TextView descTextView;
+    private TextView addressTextView;    
+    private RatingBar ratingBar;    
+    private TextView distTextView;  
+    private Button streetViewButton;
+    private Button navigateButton;
+    private Button reportButton;	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +76,7 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 		layout=(LinearLayout) findViewById(R.id.pointLayout);		
 		nameTextView = (TextView) findViewById(R.id.nameTextView);
         descTextView = (TextView) findViewById(R.id.descTextView);
-        addressTextView = (TextView) findViewById(R.id.addressTextView);        
+        addressTextView = (TextView) findViewById(R.id.newAddressTextView);        
         ratingBar =(RatingBar) findViewById(R.id.ratingBar);        
         distTextView = (TextView) findViewById(R.id.distTextView);    
         streetViewButton = (Button) findViewById(R.id.streetViewButton);
@@ -111,7 +101,6 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
             }
         }				
 	}
-	
 		
 	private void initilizeMap() {
         if (googleMap == null) {        	
@@ -168,8 +157,7 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 				}
 			});
             
-            googleMap.setOnMapClickListener(new OnMapClickListener() {
-				
+            googleMap.setOnMapClickListener(new OnMapClickListener() {				
 				@Override
 				public void onMapClick(LatLng position) {
 					if(layout.getVisibility()!=View.GONE){
@@ -199,11 +187,10 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 	}
 	
 	private void initPointInfo(final Marker marker){
-		// Getting the position from the marker
         LatLng latLng = marker.getPosition();
         nameTextView.setText(marker.getTitle());
-        descTextView.setText(marker.getSnippet());
-        
+        //descTextView.setText(marker.getSnippet());
+        descTextView.setText("-");        
         String filterAddress = "";
         Geocoder geoCoder = new Geocoder(getBaseContext(), Locale.getDefault());
         try {
@@ -247,15 +234,7 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 			@Override
 			public void onClick(View v) {
 				String geoUriString = "google.streetview:cbll="+destLatitude+","+destLongitude+"&cbp=1,99.56,,1,2.0&mz=19";
-				Intent streetView = new Intent(android.content.Intent.ACTION_VIEW,Uri.parse(geoUriString));				
-				try {
-					startActivity(streetView);
-                } catch (Exception e) {               	
-                    Toast toast = Toast.makeText(getApplicationContext(), "Error Loading StreetView, Please Install Google StreetView",
-                            Toast.LENGTH_SHORT);
-                    toast.show();
-                }
-				
+				startStreetViewIntent(geoUriString);				
 			}
 		});
         
@@ -267,25 +246,13 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 						"\n Adress: " + address+
 						"\n lat: " + destLatitude+
 						"\n lng:" + destLongitude;
-				Intent i = new Intent(Intent.ACTION_SEND);
-				i.setType("message/rfc822");
-				i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"recipient@example.com"});
-				i.putExtra(Intent.EXTRA_SUBJECT, "Report Point");
-				i.putExtra(Intent.EXTRA_TEXT   , report);
-				try {
-				    startActivity(Intent.createChooser(i, "Send mail..."));
-				} catch (android.content.ActivityNotFoundException ex) {
-				    Toast.makeText(MainActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
-				}
-				
-			}
+				reportMissing(report);				
+			}			
 		});
 	}
 	
-	
-	
 	private void setUpMap() {
-        // Retrieve the city data from the web service
+        // Retrieve the point data from the web service
         // In a worker thread since it's a network operation.
         new Thread(new Runnable() {
             public void run() {
@@ -306,8 +273,7 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
             // Connect to the web service
             URL url = new URL(SERVICE_URL);
             conn = (HttpURLConnection) url.openConnection();
-            InputStreamReader in = new InputStreamReader(conn.getInputStream());
- 
+            InputStreamReader in = new InputStreamReader(conn.getInputStream()); 
             // Read the JSON data into the StringBuilder
             int read;
             char[] buff = new char[1024];
@@ -321,8 +287,7 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
             if (conn != null) {
                 conn.disconnect();
             }
-        }
- 
+        } 
         // Create markers for the city data.
         // Must run this on the UI thread since it's a UI operation.
         runOnUiThread(new Runnable() {
@@ -336,21 +301,6 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
             }
         });
     }
-	
-//	private void readItems(String json) throws JSONException {
-//        
-//        List<Point> items = new PointReader().read(json);
-//        for (int i = 0; i < items.size(); i++) {
-//            //double offset = i / 60d;
-//            for (Point item : items) {
-//                //LatLng position = item.getPosition();
-//                //double lat = position.latitude + offset;
-//                //double lng = position.longitude + offset;
-//                //Point offsetItem = new Point(lat, lng);
-//                mClusterManager.addItem(item);
-//            }
-//        }
-//    }
 	
 	void createMarkersFromJson(String json) throws JSONException {
         // De-serialize the JSON string into an array of city objects
@@ -399,10 +349,10 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 		 case R.id.map_type:
 			 selectMapType(R.id.map_type);			 
 		 return true;
-
-			
+		 
 		case R.id.addPoint:
-			
+			Intent intentAbout = new Intent(this, AddPointActivity.class);
+			startActivity(intentAbout);
 			return true;
 
 		case R.id.feedback:	
@@ -452,17 +402,13 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 	@Override
 	public void onLocationChanged(Location location) {
 		// Getting latitude of the current location
-        double latitude = location.getLatitude();
- 
+        double latitude = location.getLatitude(); 
         // Getting longitude of the current location
-        double longitude = location.getLongitude();
- 
+        double longitude = location.getLongitude(); 
         // Creating a LatLng object for the current location
-        LatLng latLng = new LatLng(latitude, longitude);
- 
+        LatLng latLng = new LatLng(latitude, longitude); 
         // Showing the current location in Google Map
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
- 
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng)); 
         // Zoom in the Google Map
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
 	}
@@ -507,4 +453,27 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 				"https://play.google.com/store/apps/details&id=com.yurkiv.wckiev");
         return intent;
     }
+    
+    private void reportMissing(String report) {
+		Intent i = new Intent(Intent.ACTION_SEND);
+		i.setType("message/rfc822");
+		i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"recipient@example.com"});
+		i.putExtra(Intent.EXTRA_SUBJECT, "Report Point");
+		i.putExtra(Intent.EXTRA_TEXT   , report);
+		try {
+		    startActivity(Intent.createChooser(i, "Send mail..."));
+		} catch (android.content.ActivityNotFoundException ex) {
+		    Toast.makeText(MainActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+		}
+	}
+    private void startStreetViewIntent(String geoUriString) {
+		Intent streetView = new Intent(android.content.Intent.ACTION_VIEW,Uri.parse(geoUriString));				
+		try {
+			startActivity(streetView);
+        } catch (Exception e) {               	
+            Toast toast = Toast.makeText(getApplicationContext(), "Error Loading StreetView, Please Install Google StreetView",
+                    Toast.LENGTH_SHORT);
+            toast.show();
+        }
+	}
 }

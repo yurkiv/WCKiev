@@ -52,7 +52,7 @@
             android:value="AIzaSyDsYtdg1UMDXQp_jNcirDaWhJdEqUrR-RA" />
 
         <activity
-            android:name=".PointActivity"
+            android:name=".AddPointActivity"
             android:label="@string/title_activity_point" >
         </activity>
     </application>
