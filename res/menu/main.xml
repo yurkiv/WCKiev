@@ -1,12 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.yurkiv.wckiev.MainActivity" >
-
+    xmlns:hmkcode="http://schemas.android.com/apk/res-auto">
+    
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never"/>
-
+        android:id="@+id/map_type"
+        hmkcode:showAsAction="always"
+        android:icon="@drawable/ic_location_web_site"
+        android:title="change map type"/>
+        
+    <item
+        android:id="@+id/share"
+        hmkcode:showAsAction="always"
+        
+        hmkcode:actionProviderClass="android.support.v7.widget.ShareActionProvider"
+        android:title="Social share"/>	
+        
+    <item
+        android:id="@+id/addPoint"
+        hmkcode:showAsAction="ifRoom"
+        android:icon="@drawable/ic_content_new"
+        android:title="Add Point"
+        />    
+    
+	    
+	    <item
+	        android:id="@+id/feedback"
+	        hmkcode:showAsAction="ifRoom"
+	        android:icon="@drawable/ic_alerts_and_states_error"
+	        android:title="Feedback"/>
+	    
+	    <item
+	        android:id="@+id/about"
+	        hmkcode:showAsAction="ifRoom"
+	        android:icon="@drawable/ic_action_about"
+	        android:title="About"/>
 </menu>

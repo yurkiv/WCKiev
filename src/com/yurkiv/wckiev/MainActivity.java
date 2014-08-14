@@ -23,11 +23,18 @@ import com.androidmapsextensions.SupportMapFragment;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBar.OnNavigationListener;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.ShareActionProvider;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
@@ -44,6 +51,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.animation.TranslateAnimation;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
@@ -54,7 +64,7 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 
 	private static final String LOG_TAG = "WCKiev";	 
     private static final String SERVICE_URL = "http://zloysalat.github.io/test.json";
-	
+    
     private GoogleMap googleMap;    
     Location location;
     
@@ -82,8 +92,7 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
         streetViewButton = (Button) findViewById(R.id.streetViewButton);
         navigateButton = (Button) findViewById(R.id.navigateButton);
         reportButton = (Button) findViewById(R.id.reportButton);	
-        
-		
+        		
 		// Getting Google Play availability status
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getBaseContext());        
         // Showing status
@@ -144,10 +153,16 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 					
 					if(marker.isCluster()){
 						googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newlatLng, googleMap.getCameraPosition().zoom+1));					
+						if(layout.getVisibility()!=View.GONE){
+							layout.setVisibility(View.GONE);
+							//animationPointInfoDown(layout);	
+						    
+						}						
 					} else {
 						googleMap.animateCamera(CameraUpdateFactory.newLatLng(newlatLng));							
-						initPointInfo(marker);
+						initPointInfo(marker);						
 						layout.setVisibility(View.VISIBLE);
+						//animationPointInfoUp(layout);
 					}											
 					return true;
 				}
@@ -157,12 +172,31 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 				
 				@Override
 				public void onMapClick(LatLng position) {
-					layout.setVisibility(View.GONE);
-					
+					if(layout.getVisibility()!=View.GONE){
+						layout.setVisibility(View.GONE);
+						//animationPointInfoDown(layout);	
+					    
+					}				
 				}
 			});
         }        
     }
+	
+	public void animationPointInfoDown(LinearLayout layout){
+		float fropmYdelta=layout.getMeasuredHeight();
+		TranslateAnimation anim = new TranslateAnimation(0, 0, 0, fropmYdelta);
+	    anim.setDuration(500);
+	    anim.setFillAfter(true);
+	    layout.startAnimation(anim);
+	}
+	
+	public void animationPointInfoUp(LinearLayout layout){
+		float fropmYdelta=layout.getMeasuredHeight();
+		TranslateAnimation anim = new TranslateAnimation(0, 0, fropmYdelta, 0);
+	    anim.setDuration(500);
+	    anim.setFillAfter(true);
+	    layout.startAnimation(anim);
+	}
 	
 	private void initPointInfo(final Marker marker){
 		// Getting the position from the marker
@@ -335,6 +369,7 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
                         jsonObj.getDouble("lng")
                  ))
                  .data(objData)
+                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_icon_toilets))
             );
         }        
     }
@@ -348,20 +383,69 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
+		getMenuInflater().inflate(R.menu.main, menu);		
+
+		MenuItem menuItem = menu.findItem(R.id.share);
+		final ShareActionProvider mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);	
+		if (mShareActionProvider != null) {
+	        mShareActionProvider.setShareIntent(getDefaultShareIntent());
+	    }		
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
+		switch (item.getItemId()) {
+		 case R.id.map_type:
+			 selectMapType(R.id.map_type);			 
+		 return true;
+
+			
+		case R.id.addPoint:
+			
 			return true;
+
+		case R.id.feedback:	
+			sendFeddback();
+			return true;			
+			
+		case R.id.about:	
+			return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
 		}
-		return super.onOptionsItemSelected(item);
+	}
+
+
+	private void selectMapType(int mapType) {
+		View menuItemView = findViewById(mapType); // SAME ID AS MENU ID
+		PopupMenu popup = new PopupMenu(MainActivity.this, menuItemView);
+		// Inflating the Popup using xml file
+		popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+		// registering popup with OnMenuItemClickListener
+		popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+			public boolean onMenuItemClick(MenuItem item) {
+				switch (item.getItemId()) {
+				case R.id.normal:
+					googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+					return true;
+				case R.id.hybrid:
+					googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+					return true;
+				case R.id.satellite:
+					googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+					return true;
+				case R.id.terrain:
+					googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+					return true;
+				default:
+					googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+					return true;
+				}
+			}
+		});
+		popup.show();// showing popup menu
 	}
 
 
@@ -400,6 +484,27 @@ public class MainActivity extends ActionBarActivity implements  LocationListener
 		
 	}
 	
+	private void sendFeddback(){
+		String report="Enter Feedback..";
+		Intent i = new Intent(Intent.ACTION_SEND);
+		i.setType("message/rfc822");
+		i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"recipient@example.com"});
+		i.putExtra(Intent.EXTRA_SUBJECT, "Feedback");
+		i.putExtra(Intent.EXTRA_TEXT   , report);
+		try {
+		    startActivity(Intent.createChooser(i, "Send mail..."));
+		} catch (android.content.ActivityNotFoundException ex) {
+		    Toast.makeText(MainActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+		}
+	}
 	
-
+    /** Returns a share intent */
+    private Intent getDefaultShareIntent(){
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        //intent.putExtra(Intent.EXTRA_SUBJECT, "SUBJECT");
+        intent.putExtra(Intent.EXTRA_TEXT, "I recommend you the Kiev WC application!\n" +
+				"https://play.google.com/store/apps/details&id=com.yurkiv.wckiev");
+        return intent;
+    }
 }

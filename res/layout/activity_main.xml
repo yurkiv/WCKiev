@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/background_light"
+    android:contentDescription="uhkhjk"
     android:gravity="bottom"
     android:orientation="vertical" >
 
@@ -24,33 +26,36 @@
         android:id="@+id/pointLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#fff"
+        android:layout_gravity="bottom"
+        android:background="@color/trans50"
         android:gravity="bottom|center_horizontal"
         android:orientation="vertical"
-        android:visibility="visible" 
-        android:layout_gravity="bottom">
+        android:visibility="visible" >
 
         <TextView
             android:id="@+id/nameTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Name"
             android:gravity="center"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:text="Name"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/addressTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Address" />
+            android:text="Address"
+            android:textColor="@color/White" />
 
         <TextView
             android:id="@+id/descTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Desc" />
+            android:text="Desc"
+            android:textColor="@color/White" />
 
         <RatingBar
             android:id="@+id/ratingBar"
@@ -58,36 +63,54 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:isIndicator="true"
-            android:numStars="5" />
+            android:numStars="3" />
 
         <TextView
             android:id="@+id/distTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Distance" />
+            android:text="Distance"
+            android:textColor="@color/White" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/abc_action_bar_icon_vertical_padding" >
+            android:layout_marginBottom="@dimen/abc_action_bar_icon_vertical_padding"
+            android:layout_marginTop="@dimen/abc_action_bar_icon_vertical_padding" >
 
             <Button
                 android:id="@+id/streetViewButton"
+                style="@style/Buttonwckiev"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="StreetView" />
+                android:layout_height="match_parent"
+                android:background="@drawable/wckiev_btn_default_holo_dark"
+                android:drawableLeft="@drawable/ic_street_view"
+                android:text="StreetView"
+                android:textColor="@color/White"
+                android:textSize="@dimen/textsize14" />
 
             <Button
                 android:id="@+id/navigateButton"
+                style="@style/Buttonwckiev"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Navigate" />
+                android:layout_height="match_parent"
+                android:background="@drawable/wckiev_btn_default_holo_dark"
+                android:drawableLeft="@drawable/ic_location_directions"
+                android:text="Navigate"
+                android:textColor="@color/White"
+                android:textSize="@dimen/textsize14" />
 
             <Button
                 android:id="@+id/reportButton"
+                style="@style/Buttonwckiev"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Report" />
+                android:layout_height="match_parent"
+                android:background="@drawable/wckiev_btn_default_holo_dark"
+                android:drawableLeft="@drawable/ic_alerts_and_states_error"
+                android:text="Report"
+                android:textColor="@color/White"
+                android:textSize="@dimen/textsize14" />
+
         </LinearLayout>
     </LinearLayout>
     
